@@ -18,6 +18,7 @@ class Application extends Component {
 
   componentDidMount() {
     auth.onAuthStateChanged(currentUser => {
+      console.log(currentUser);
       this.setState({ currentUser });
 
       this.restaurantRef.on("value", snapshot => {

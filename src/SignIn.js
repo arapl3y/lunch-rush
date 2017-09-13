@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { auth, googleAuthProvider } from "./firebase";
+import { auth, googleAuthProvider, githubAuthProvider } from "./firebase";
 
 class SignIn extends Component {
   render() {
@@ -10,7 +10,14 @@ class SignIn extends Component {
             auth.signInWithPopup(googleAuthProvider);
           }}
         >
-          Sign In
+          Sign in with Google
+        </button>
+        <button
+          onClick={() => {
+            auth.signInWithPopup(githubAuthProvider);
+          }}
+        >
+          Sign in with Github
         </button>
       </div>
     );
