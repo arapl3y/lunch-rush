@@ -11,70 +11,67 @@ const capitalizeSentence = require("capitalize-sentence");
 const Filter = require("bad-words");
 const badWordsFilter = new Filter();
 
-// Moderates messages by lowering all uppercase messages and removing swearwords.
+// Moderates names by lowering all uppercase names and removing swearwords.
 exports.moderator = functions.database
-  .ref("/restaurant/{restaurantId}")
+  .ref("/restaurants/{name}")
   .onWrite(event => {
-    const message = event.data.val();
+    const name = event.data.val();
 
-    if (message && !message.sanitized) {
-      // Retrieved the message values.
-      console.log("Retrieved message content: ", message);
+    if (name && !name.sanitized) {
+      // Retrieved the name values.
+      console.log("Retrieved name content: ", name);
 
-      // Run moderation checks on on the message and moderate if needed.
-      const moderatedMessage = moderateMessage(message.text);
+      // Run moderation checks on on the name and moderate if needed.
+      const moderatedName = moderateName(name.text);
 
-      // Update the Firebase DB with checked message.
-      console.log(
-        "Message has been moderated. Saving to DB: ",
-        moderatedMessage
-      );
+      // Update the Firebase DB with checked name.
+      console.log("Name has been moderated. Saving to DB: ", moderatedName);
       return event.data.adminRef.update({
-        text: moderatedMessage,
+        text: moderatedName,
         sanitized: true,
-        moderated: message.text !== moderatedMessage
+        moderated: name.text !== moderatedName
       });
     }
   });
 
-// Moderates the given message if appropriate.
-function moderateMessage(message) {
+// Moderates the given name if appropriate.
+function moderateName(name) {
   // Re-capitalize if the user is Shouting.
-  if (isShouting(message)) {
+  if (isShouting(name)) {
     console.log("User is shouting. Fixing sentence case...");
-    message = stopShouting(message);
+    name = stopShouting(name);
   }
 
   // Moderate if the user uses SwearWords.
-  if (containsSwearwords(message)) {
+  if (containsSwearwords(name)) {
     console.log("User is swearing. moderating...");
-    message = moderateSwearwords(message);
+    name = moderateSwearwords(name);
   }
 
-  return message;
+  return name;
 }
 
 // Returns true if the string contains swearwords.
-function containsSwearwords(message) {
-  return message !== badWordsFilter.clean(message);
+function containsSwearwords(name) {
+  return name !== badWordsFilter.clean(name);
 }
 
 // Hide all swearwords. e.g: Crap => ****.
-function moderateSwearwords(message) {
-  return badWordsFilter.clean(message);
+function moderateSwearwords(name) {
+  return badWordsFilter.clean(name);
 }
 
-// Detect if the current message is shouting. i.e. there are too many Uppercase
+// Detect if the current name is shouting. i.e. there are too many Uppercase
 // characters or exclamation points.
-function isShouting(message) {
+function isShouting(name) {
   return (
-    message.replace(/[^A-Z]/g, "").length > message.length / 2 ||
-    message.replace(/[^!]/g, "").length >= 3
+    name.replace(/[^A-Z]/g, "").length > name.length / 2 ||
+    name.replace(/[^!]/g, "").length >= 3
   );
 }
 
 // Correctly capitalize the string as a sentence (e.g. uppercase after dots)
 // and remove exclamation points.
-function stopShouting(message) {
-  return capitalizeSentence(message.toLowerCase()).replace(/!+/g, ".");
+function stopShouting(name) {
+  return capitalizeSentence(name.toLowerCase()).replace(/!+/g, ".");
 }
